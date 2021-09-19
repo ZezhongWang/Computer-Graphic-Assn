@@ -69,7 +69,14 @@ vector<Vertex> unpackIndexedData(
 		// YOUR CODE HERE (R3)
 		// Unpack the indexed data into a vertex array. For every face, you have to
 		// create three vertices and add them to the vector 'vertices'.
-
+		for (int i = 0; i < 3; i++)
+		{
+			Vertex v;
+			v.position = positions[f[i*2]];
+			v.normal = normals[f[i*2 + 1]];
+			vertices.push_back(v);
+		}
+		
 		// f[0] is the index of the position of the first vertex
 		// f[1] is the index of the normal of the first vertex
 		// f[2] is the index of the position of the second vertex
@@ -471,9 +478,13 @@ vector<Vertex> App::loadObjFileModel(string filename) {
 			// Read the three vertex coordinates (x, y, z) into 'v'.
 			// Store a copy of 'v' in 'positions'.
 			// See std::vector documentation for push_back.
+			iss >> v.x >> v.y >> v.z;
+			positions.push_back(v);
 		} else if (s == "vn") { // normal
 			// YOUR CODE HERE (R4)
 			// Similar to above.
+			iss >> v.x >> v.y >> v.z;
+			normals.push_back(v);
 		} else if (s == "f") { // face
 			// YOUR CODE HERE (R4)
 			// Read the indices representing a face and store it in 'faces'.
@@ -490,9 +501,15 @@ vector<Vertex> App::loadObjFileModel(string filename) {
 
 			// Note that in C++ we index things starting from 0, but face indices in OBJ format start from 1.
 			// If you don't adjust for that, you'll index past the range of your vectors and get a crash.
-
+			iss >> f[0] >> sink >> f[1]
+				>> f[2] >> sink >> f[3]
+				>> f[4] >> sink >> f[5];
+			for (auto & idx : f) {
+				idx -= 1;
+			}
+			faces.push_back(f);
 			// It might be a good idea to print the indices to see that they were read correctly.
-			// cout << f[0] << " " << f[1] << " " << f[2] << " " << f[3] << " " << f[4] << " " << f[5] << endl;
+			//cout << f[0] << " " << f[1] << " " << f[2] << " " << f[3] << " " << f[4] << " " << f[5] << endl;
 		}
 	}
 	common_ctrl_.message(("Loaded mesh from " + filename).c_str());
