@@ -266,6 +266,8 @@ bool App::handleEvent(const Window::Event& ev) {
 		// Event::mouseDragging tells whether some mouse buttons are currently down.
 		// If you want to know which ones, you have to keep track of the button down/up events
 		// (e.g. FW_KEY_MOUSE_LEFT).
+		//cout << ev.mouseDelta.x << endl;
+		if (ev.mouseDragging) camera_rotation_angle_ += FW_PI * 0.001 * ev.mouseDelta.x;
 	}
 
 	if (ev.type == Window::EventType_Close) {
