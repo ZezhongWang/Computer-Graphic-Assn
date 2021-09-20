@@ -34,3 +34,5 @@
 # folder
 */.vs/*
 */bin/*
+README.txt  
+*.zip
