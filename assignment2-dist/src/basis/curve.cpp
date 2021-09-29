@@ -35,12 +35,22 @@ Curve coreBezier(const Vec3f& p0,
 
 	// YOUR CODE HERE (R1): build the basis matrix and loop the given number of steps,
 	// computing points on the spline
+	Mat4f B, G;
+    B.setRow(0, Vec4f(1, -3, 3, -1));
+    B.setRow(1, Vec4f(0, 3, -6, 3));
+    B.setRow(2, Vec4f(0, 0, 3, -3));
+    B.setRow(3, Vec4f(0, 0, 0, 1));
 
-	Mat4f B;
-	// ...
+    G.setCol(0, Vec4f(p0, 0));
+    G.setCol(1, Vec4f(p1, 0));
+    G.setCol(2, Vec4f(p2, 0));
+    G.setCol(3, Vec4f(p3, 0));
 
 	for (unsigned i = 0; i <= steps; ++i) {
-		// ...
+        CurvePoint P;
+        float t = 1.0 * i / steps;
+        P.V = (G * B * Vec4f(1, t, t * t, t * t * t)).getXYZ();
+        R[i] = P;
 	}
 
 	return R;
@@ -78,6 +88,12 @@ Curve evalBezier(const vector<Vec3f>& P, unsigned steps, bool adaptive, float er
     // the SWP files are written.  But you are free to interpret this
     // variable however you want, so long as you can control the
     // "resolution" of the discretized spline curve with it.
+    Curve R;
+    for (unsigned i = 0; 3 * i + 3 <= P.size(); ++i) {
+        unsigned pos = 3 * i;
+        Curve temp = coreBezier(P[pos], P[pos + 1], P[pos + 2], P[pos + 3], Vec3f(), steps);
+        R.insert(R.end(), temp.begin(), temp.end());
+    }
 
 	// EXTRA CREDIT NOTE:
     // Also compute the other Vec3fs for each CurvePoint: T, N, B.
@@ -97,10 +113,14 @@ Curve evalBezier(const vector<Vec3f>& P, unsigned steps, bool adaptive, float er
     }
 
     cerr << "\t>>> Steps (type steps): " << steps << endl;
-    cerr << "\t>>> Returning empty curve." << endl;
+    //cerr << "\t>>> Returning empty curve." << endl;
+    cerr << "\t>>> Curve points (type vector<Vec3f>): " << endl;
+    for (unsigned i = 0; i < R.size(); ++i) {
+        cerr << "\t>>> "; printTranspose(R[i].V); cerr << endl;
+    }
 
     // Right now this will just return this empty curve.
-    return Curve();
+    return R;
 }
 
 // the P argument holds the control points and steps gives the amount of uniform tessellation.
