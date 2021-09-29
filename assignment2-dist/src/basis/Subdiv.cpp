@@ -260,11 +260,40 @@ void MeshWithConnectivity::LoopSubdivision() {
 			// vertices with a visible color, so you can ensure that the 1-ring generated is correct.
 			// The solution exe implements this so you can see an example of what you can do with the
 			// highlight mode there.
-			pos = positions[v0];
-			col = colors[v0];
-			norm = normals[v0];
 
+			std::vector<int> near_vertex;
+			int last_tri = i;
+			int last_edge = j;		// j range from 0 to 2
+			do {
+				int near_tri = neighborTris[last_tri][last_edge];
+				int near_edge = neighborEdges[last_tri][last_edge];
+				if (near_tri == -1 || near_edge == -1) {
+					pos = positions[v0];
+					col = colors[v0];
+					norm = normals[v0];
+					break;
+				}
+				Vec3i cur_tri = indices[near_tri];
+				int cur_point = cur_tri[(near_edge + 2) % 3];
+				near_vertex.push_back(cur_point);
+				last_tri = near_tri;
+				last_edge = (near_edge + 1) % 3;
+			} while (last_tri != i);
 
+			float B;
+			if (near_vertex.size() == 3)
+				B = 3.0f / 16.0f;
+			else
+				B = 3.0f / 8.0f / near_vertex.size();
+
+			pos = (1 - near_vertex.size() * B) * positions[v0];
+			col = (1 - near_vertex.size() * B) * colors[v0];
+			norm = (1 - near_vertex.size() * B) * normals[v0];
+			for (auto cur_point : near_vertex) {
+				pos += positions[cur_point] * B;
+				col += colors[cur_point] * B;
+				norm += normals[cur_point] * B;
+			}
 			// Stop here if we're doing the debug pass since we don't actually need to modify the mesh
 			if (debugPass)
 				return;
