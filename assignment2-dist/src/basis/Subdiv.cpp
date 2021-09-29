@@ -201,6 +201,7 @@ void MeshWithConnectivity::LoopSubdivision() {
 				// YOUR CODE HERE (R3):
 				// Map the edge to the correct vertex index.
 				// This is just one line! Use new_vertices and the index of the position that was just pushed back to the vector.
+				new_vertices[edge] = new_positions.size() - 1;
 				}
 			}
 	}
@@ -268,30 +269,33 @@ void MeshWithConnectivity::LoopSubdivision() {
 
 		// YOUR CODE HERE (R3):
 		// fill in X and Y (it's the same for both)
-		//auto edge_a = std::make_pair(min(X, Y), max(X, Y));
-		//auto edge_b = ...
-		//auto edge_c = ...
+		auto edge_a = std::make_pair(min(even[0], even[1]), max(even[0], even[1]));
+		auto edge_b = std::make_pair(min(even[1], even[2]), max(even[1], even[2]));
+		auto edge_c = std::make_pair(min(even[2], even[0]), max(even[2], even[0]));
 
 		// The edges edge_a, edge_b and edge_c now define the vertex indices via new_vertices.
 		// (The mapping is done in the loop above.)
 		// The indices define the smaller triangle inside the indices defined by "even", in order.
 		// Read the vertex indices out of new_vertices to build the small triangle "odd"
 
-		// Vec3i odd = ...
+		Vec3i odd = Vec3i(new_vertices[edge_a], new_vertices[edge_b], new_vertices[edge_c]);
 
 		// Then, construct the four smaller triangles from the surrounding big triangle  "even"
 		// and the inner one, "odd". Push them to "new_indices".
 
 		// NOTE: REMOVE the following line after you're done with the new triangles.
 		// This just keeps the mesh intact and serves as an example on how to add new triangles.
-		new_indices.push_back( Vec3i( even[0], even[1], even[2] ) );
+		new_indices.push_back(Vec3i(even[0], odd[0], odd[2]));
+		new_indices.push_back( Vec3i(even[1], odd[1], odd[2]) );
+		new_indices.push_back(Vec3i(even[2], odd[0], odd[1]));
+		new_indices.push_back(odd);
 	}
 
 	// ADD THESE LINES when R3 is finished. Replace the originals with the repositioned data.
-	//indices = std::move(new_indices);
-	//positions = std::move(new_positions);
-	//normals = std::move(new_normals);
-	//colors = std::move(new_colors);
+	indices = std::move(new_indices);
+	positions = std::move(new_positions);
+	normals = std::move(new_normals);
+	colors = std::move(new_colors);
 }
 
 } // namespace FW
