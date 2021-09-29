@@ -135,6 +135,33 @@ Curve evalBspline(const vector<Vec3f>& P, unsigned steps, bool adaptive, float e
     // YOUR CODE HERE (R2):
     // We suggest you implement this function via a change of basis from
 	// B-spline to Bezier.  That way, you can just call your evalBezier function.
+    Curve R;
+    Mat4f B1, B2;
+	B1.setRow(0, Vec4f(1, -3, 3, -1));
+	B1.setRow(1, Vec4f(4, 0, -6, 3));
+	B1.setRow(2, Vec4f(1, 3, 3, -3));
+	B1.setRow(3, Vec4f(0, 0, 0, 1));
+	B1 /= 6;
+	B2.setRow(0, Vec4f(1, -3, 3, -1));
+	B2.setRow(1, Vec4f(0, 3, -6, 3));
+	B2.setRow(2, Vec4f(0, 0, 3, -3));
+	B2.setRow(3, Vec4f(0, 0, 0, 1));
+
+
+    for (unsigned i = 0; i + 3 < P.size(); ++i) {
+        Mat4f G;
+        G.setCol(0, Vec4f(P[i], 0));
+        G.setCol(1, Vec4f(P[i + 1], 0));
+        G.setCol(2, Vec4f(P[i + 2], 0));
+        G.setCol(3, Vec4f(P[i + 3], 0));
+        G = G * B1 * B2.inverted();
+        Vec4f P0 = G.getCol(0);
+        Vec4f P1 = G.getCol(1);
+        Vec4f P2 = G.getCol(2);
+        Vec4f P3 = G.getCol(3);
+        Curve temp = coreBezier(P0.getXYZ(), P1.getXYZ(), P2.getXYZ(), P3.getXYZ(), Vec3f(), steps);
+        R.insert(R.end(), temp.begin(), temp.end());
+    }
 
     cerr << "\t>>> evalBSpline has been called with the following input:" << endl;
 
@@ -147,7 +174,7 @@ Curve evalBspline(const vector<Vec3f>& P, unsigned steps, bool adaptive, float e
     cerr << "\t>>> Returning empty curve." << endl;
 
     // Return an empty curve right now.
-    return Curve();
+    return R;
 }
 
 Curve evalCircle(float radius, unsigned steps) {
