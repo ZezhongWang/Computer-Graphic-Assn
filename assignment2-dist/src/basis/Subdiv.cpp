@@ -190,9 +190,28 @@ void MeshWithConnectivity::LoopSubdivision() {
 					// Be sure to see section 3.2 in the handout for an in depth explanation of the neighbor index tables; the scheme is somewhat involved.
 					Vec3f pos, col, norm;
 					// This default implementation just puts the new vertex at the edge midpoint.
-					pos = 0.5f * (positions[v0] + positions[v1]);
-					col = 0.5f * (colors[v0] + colors[v1]);
-					norm = 0.5f * (normals[v0] + normals[v1]);
+					//pos = 0.5f * (positions[v0] + positions[v1]);
+					//col = 0.5f * (colors[v0] + colors[v1]);
+					//norm = 0.5f * (normals[v0] + normals[v1]);
+					int v2, v3;
+					v2 = indices[i][(j + 2) % 3];
+					int neigh_edge_index = neighborEdges[i][j];
+					if (neigh_edge_index == -1) {
+						pos = 0;
+						col = 0;
+						norm = 0;
+					}
+					else {
+						int neigh_tris = neighborTris[i][j];
+						v3 = indices[neigh_tris][(neigh_edge_index + 2) % 3];
+						if (v3 == -1) {
+							printf("Unexpected condition");
+							system("pause");
+						}
+						pos = 0.375f * (positions[v0] + positions[v1]) + 0.125f * (positions[v2] + positions[v3]);
+						col = 0.375f * (colors[v0] + colors[v1]) + 0.125f * (colors[v2] + colors[v3]);
+						norm = 0.375f * (normals[v0] + normals[v1]) + 0.125f * (normals[v2] + normals[v3]);
+					}
 
 				new_positions.push_back(pos);
 				new_colors.push_back(col);
@@ -286,8 +305,8 @@ void MeshWithConnectivity::LoopSubdivision() {
 		// NOTE: REMOVE the following line after you're done with the new triangles.
 		// This just keeps the mesh intact and serves as an example on how to add new triangles.
 		new_indices.push_back(Vec3i(even[0], odd[0], odd[2]));
-		new_indices.push_back( Vec3i(even[1], odd[1], odd[2]) );
-		new_indices.push_back(Vec3i(even[2], odd[0], odd[1]));
+		new_indices.push_back(Vec3i(even[1], odd[1], odd[0]));
+		new_indices.push_back(Vec3i(even[2], odd[2], odd[1]));
 		new_indices.push_back(odd);
 	}
 
