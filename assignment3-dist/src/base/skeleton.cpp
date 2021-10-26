@@ -29,7 +29,14 @@ void Skeleton::setJointRotation(unsigned index, Vec3f euler_angles) {
 	// upper 3x3 block of "to_parent" with the result.
 	// Hints: You can use Mat3f::rotation() three times in a row,
 	// once for each main axis, and multiply the results.
-
+	Mat4f C;
+	const Mat3f rot = Mat3f::rotation(Vec3f(1, 0, 0), euler_angles.x) * Mat3f::rotation(Vec3f(0, 1, 0), euler_angles.y) * 
+		Mat3f::rotation(Vec3f(0, 0, 1), euler_angles.z);
+	C.setCol(0, Vec4f(rot.getCol(0), 0));
+	C.setCol(1, Vec4f(rot.getCol(1), 0));
+	C.setCol(2, Vec4f(rot.getCol(2), 0));
+	C.setCol(3, Vec4f(0, 0, 0, 1));
+	joint.to_parent *= C;
 }
 
 void Skeleton::incrJointRotation(unsigned index, Vec3f euler_angles) {
@@ -83,7 +90,7 @@ vector<Mat4f> Skeleton::getSSDTransforms() {
 
 	vector<Mat4f> transforms;
 
-	
+
 	return transforms;
 }
 
@@ -98,7 +105,7 @@ float Skeleton::loadBVH(string skeleton_file) {
 	{
 		stringstream stream(line);
 		stream >> s;
-		
+
 		if (s == "ROOT")
 		{
 			string jointName;
@@ -221,7 +228,7 @@ void Skeleton::loadAnim(ifstream& in, std::vector<Vec3i>& axisPermutation)
 		float* frameData = (float*)(animationData.data() + frameNum);
 		stringstream stream(line);
 		int i = 0;
-		while(stream.good())
+		while (stream.good())
 			stream >> frameData[i++];
 		frameNum++;
 	}
@@ -243,7 +250,7 @@ void Skeleton::loadAnim(ifstream& in, std::vector<Vec3i>& axisPermutation)
 		f.position -= posAccum / float(animationData.size());
 }
 
-void Skeleton::load(string skeleton_file) {	
+void Skeleton::load(string skeleton_file) {
 	ifstream in(skeleton_file);
 	Joint joint;
 	Vec3f pos;
@@ -261,7 +268,8 @@ void Skeleton::load(string skeleton_file) {
 			jointNameMap[name] = int(joints_.size() - 1);
 			if (current_joint == 0) {
 				assert(parent == -1 && "first node read should always be the root node");
-			} else {
+			}
+			else {
 				assert(parent != -1 && "there should not be more than one root node");
 				joints_[parent].children.push_back(current_joint);
 			}
