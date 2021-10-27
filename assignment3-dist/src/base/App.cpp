@@ -452,9 +452,38 @@ vector<Vertex> App::computeSSD(const vector<WeightedVertex>& source_vertices) {
 		// This starter code just copies the source vertex untouched, so the result is not animated.
 		// Replace these lines with the loop that applies the bone transforms and weights.
 		// For R5, transform the normals as well.
-		v.position = sv.position;	
-		v.normal = sv.normal;		
+		v.position = Vec3f();
+		v.normal = Vec3f();
 		v.color = sv.color;
+		for (int i = 0; i < WEIGHTS_PER_VERTEX; i++)
+		{
+			Mat4f& ssd_transform = ssd_transforms[sv.joints[i]];
+			float weight = sv.weights[i];
+			v.position += weight * (ssd_transform * sv.position);
+			v.normal += weight * (ssd_transform.getXYZ() * sv.normal);
+			//Vec3f a = weight * (ssd_transform * sv.position);
+			//Vec3f b = weight * ssd_transform * sv.position;
+			//Vec3f c = ssd_transform * sv.position * weight;
+			//Vec3f d = (weight * ssd_transform) * sv.position;
+			//if (a != b) {
+			//	cout << "Not equal!" << endl;
+			//	cout << "ssd_transform * sv.position = " << endl;
+			//	(ssd_transform * sv.position).print();
+			//	cout << "ssd_transform  = " << endl;
+			//	ssd_transform.print();
+			//	cout << "weight * ssd_transform  = " << endl;
+			//	(weight * ssd_transform).print();
+			//	cout << "weight * (ssd_transform * sv.position) = " << endl;
+			//	a.print();
+			//	cout << "weight * ssd_transform * sv.position = " << endl;
+			//	b.print();
+			//	cout << "ssd_transform * sv.position * weight = " << endl;
+			//	c.print();
+			//	cout << "(weight * ssd_transform) * sv.position = " << endl;
+			//	d.print();
+			//	system("pause");
+			//}
+		}
 
 		skinned_vertices.push_back(v);
 	}
