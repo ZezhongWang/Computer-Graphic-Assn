@@ -19,6 +19,18 @@ void eulerStep(ParticleSystem& ps, float step) {
 void trapezoidStep(ParticleSystem& ps, float step) {
 	// YOUR CODE HERE (R3)
 	// Implement a trapezoid integrator.
+	const auto& x0 = ps.state();
+	auto n = x0.size();
+	auto f0 = ps.evalF(x0);
+	auto xm = State(n), x1 = State(n);
+	for (auto i = 0u; i < n; ++i) {
+		xm[i] = x0[i] + step * f0[i];
+	}
+	auto fm = ps.evalF(xm);
+	for (auto i = 0u; i < n; ++i) {
+		x1[i] = x0[i] + step * 0.5f * (fm[i] + f0[i]);
+	}
+	ps.set_state(x1);
 }
 
 void midpointStep(ParticleSystem& ps, float step) {
