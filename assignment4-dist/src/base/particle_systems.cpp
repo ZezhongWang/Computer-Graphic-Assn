@@ -17,12 +17,12 @@ namespace {
 	// force acting on particle at pos1 due to spring attached to pos2 at the other end
 	inline Vec3f fSpring(const Vec3f& pos1, const Vec3f& pos2, float k, float rest_length) {
 		// YOUR CODE HERE (R2)
-		return Vec3f(0);
+		auto d = pos1 - pos2;
+		return -k * (d.length() - rest_length) * d / d.length();
 	}
 
 	inline Vec3f fDrag(const Vec3f& v, float k) {
-		// YOUR CODE HERE (R2)
-		return Vec3f(0);
+		return -k * v;
 	}
 
 } // namespace
@@ -71,6 +71,11 @@ void SpringSystem::reset() {
 	// Set the initial state for a particle system with one particle fixed
 	// at origin and another particle hanging off the first one with a spring.
 	// Place the second particle initially at start_pos.
+	spring_ = Spring(0, 2, spring_k, rest_length);
+	current_state_[0] = Vec3f(0, 0, 0);
+	current_state_[1] = Vec3f(0, 0, 0);		// start velocity
+	current_state_[2] = start_pos;
+	current_state_[3] = Vec3f(0, 0, 0);		// start velocity
 }
 
 State SpringSystem::evalF(const State& state) const {
@@ -80,7 +85,13 @@ State SpringSystem::evalF(const State& state) const {
 	// YOUR CODE HERE (R2)
 	// Return a derivative for the system as if it was in state "state".
 	// You can use the fGravity, fDrag and fSpring helper functions for the forces.
-
+	f[0] = current_state_[0];
+	f[1] = 0;		// fixed
+	f[2] = current_state_[3];
+	auto fG = fGravity(mass);
+	auto fD = fDrag(f[2], drag_k);
+	auto fS = fSpring(current_state_[spring_.i2], current_state_[spring_.i1], spring_.k, spring_.rlen);
+	f[3] = (fG + fD + fS) / mass;
 	return f;
 }
 
@@ -160,7 +171,7 @@ Lines PendulumSystem::getLines() {
 void ClothSystem::reset() {
 	const auto spring_k = 300.0f;
 	const auto width = 1.5f, height = 1.5f; // width and height of the whole grid
-	current_state_ = State(2 * x_*y_);
+	current_state_ = State(2 * x_ * y_);
 	// YOUR CODE HERE (R5)
 	// Construct a particle system with a x_ * y_ grid of particles,
 	// connected with a variety of springs as described in the handout:
