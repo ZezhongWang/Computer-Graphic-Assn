@@ -152,7 +152,7 @@ bool App::handleEvent(const Window::Event& ev) {
 		// YOUR CODE HERE (bullet extra):
 		// Compute bullet origin and direction here based on current view matrix and mouse position
 
-#endif
+//#endif
 	}
 
 	window_.setVisible(true);

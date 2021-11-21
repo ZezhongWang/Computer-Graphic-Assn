@@ -36,3 +36,4 @@
 */bin/*
 README.txt  
 *.zip
+*/build/*
