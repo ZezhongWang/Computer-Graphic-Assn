@@ -199,6 +199,24 @@ void ClothSystem::reset() {
 	// Construct a particle system with a x_ * y_ grid of particles,
 	// connected with a variety of springs as described in the handout:
 	// structural springs, shear springs and flex springs.
+	// structural springs
+	for (int i = 0; i < y_; ++i) {
+		for (int j = 0; j < x_; ++j) {
+			// horizontal
+			int idx = i * x_ + j;
+			if (j < x_ - 1) {
+				Spring spring = Spring(idx, idx + 1, spring_k, width / (x_ - 1));
+				springs_.push_back(spring);
+			}
+			// vertical
+			if (i < y_ - 1) {
+				Spring spring = Spring(idx, idx + x_, spring_k, height / (y_ - 1));
+				springs_.push_back(spring);
+			}
+			current_state_[pos(i, j)] = Vec3f(width / (x_ - 1) * j, height / (y_ - 1) * i, 0);
+			current_state_[vel(i, j)] = Vec3f(0, 0, 0);
+		}
+	}
 }
 
 State ClothSystem::evalF(const State& state) const {
@@ -208,6 +226,36 @@ State ClothSystem::evalF(const State& state) const {
 	auto f = State(2 * n);
 	// YOUR CODE HERE (R5)
 	// This will be much like in R2 and R4.
+	for (int i = 0; i < y_; ++i) {
+		for (int j = 0; j < x_; ++j) {
+			// add gravity & drag
+			int idx = i * x_ + j;
+			f[2 * idx] = current_state_[vel(i, j)];
+			f[2 * idx + 1] = (fGravity(mass) + fDrag(current_state_[vel(i, j)], drag_k)) / mass;
+		}
+	}
+
+	for (auto& spring : springs_) {
+		// add resultant force
+		int i1 = spring.i1;
+		int i2 = spring.i2;
+		auto fS = fSpring(current_state_[2 * i1], current_state_[2 * i2], spring.k, spring.rlen) / mass;
+		f[2 * i1 + 1] += fS;
+		f[2 * i2 + 1] += -fS;
+	}
+
+	// holding points
+	f[0] = f[1] = 0;
+	f[2 * (x_ - 1)] = 0;// f[2 * (x_ - 1) + 1] = 0;
+
+	for (int x = 0; x < x_; ++x) {
+		for (int y = 0; y < y_; ++y) {
+			int idx = y * x_ + x;
+			if (f[2 * idx + 1].isZero()) {
+				std::cout << "is Zero: " << idx <<"\t";
+			}
+		}
+	}
 	return f;
 }
 

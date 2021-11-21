@@ -106,6 +106,8 @@ public:
 	Lines					getLines() override;
 	FW::Vec2i				getSize() { return FW::Vec2i(x_, y_); }
 
+	int pos(int x, int y) const { return 2 * (x + y * x_); };
+	int vel(int x, int y) const { return 2 * (x + y * x_) + 1; };
 private:
 	unsigned				x_, y_;
 	std::vector<Spring>		springs_;
