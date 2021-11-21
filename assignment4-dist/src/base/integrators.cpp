@@ -50,6 +50,28 @@ void midpointStep(ParticleSystem& ps, float step) {
 
 void rk4Step(ParticleSystem& ps, float step) {
 	// EXTRA: Implement the RK4 Runge-Kutta integrator.
+	const auto& x0 = ps.state();
+	auto n = x0.size();
+	auto k1 = ps.evalF(x0);
+	auto x1 = State(n), x2 = State(n);
+	auto x3 = State(n), xm = State(n);
+	for (auto i = 0u; i < n; ++i) {
+		x1[i] = x0[i] + step * k1[i] / 2;
+	}
+	auto k2 = ps.evalF(x1);
+	for (auto i = 0u; i < n; ++i) {
+		x2[i] = x0[i] + step * k2[i] / 2;
+	}
+	auto k3 = ps.evalF(x2);
+	for (auto i = 0u; i < n; ++i) {
+		x3[i] = x0[i] + step * k3[i];
+	}
+	auto k4 = ps.evalF(x3);
+
+	for (auto i = 0u; i < n; ++i) {
+		xm[i] = x0[i] + step / 6.0f * (k1[i] + 2.0f * k2[i] + 2.0f * k3[i] + k4[i]);
+	}
+	ps.set_state(xm);
 }
 
 #ifdef EIGEN_SPARSECORE_MODULE_H
