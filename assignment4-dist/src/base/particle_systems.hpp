@@ -86,6 +86,9 @@ public:
 	Points					getPoints() override;
 	Lines					getLines() override;
 
+	int pos(int i) const { return 2 * i; };
+	int vel(int i) const { return 2 * i + 1; };
+
 private:
 	unsigned				n_;
 	std::vector<Spring>		springs_;

@@ -71,7 +71,7 @@ void SpringSystem::reset() {
 	// Set the initial state for a particle system with one particle fixed
 	// at origin and another particle hanging off the first one with a spring.
 	// Place the second particle initially at start_pos.
-	spring_ = Spring(0, 2, spring_k, rest_length);
+	spring_ = Spring(0, 1, spring_k, rest_length);
 	current_state_[0] = Vec3f(0, 0, 0);
 	current_state_[1] = Vec3f(0, 0, 0);		// start velocity
 	current_state_[2] = start_pos;
@@ -90,7 +90,7 @@ State SpringSystem::evalF(const State& state) const {
 	f[2] = current_state_[3];
 	auto fG = fGravity(mass);
 	auto fD = fDrag(f[2], drag_k);
-	auto fS = fSpring(current_state_[spring_.i2], current_state_[spring_.i1], spring_.k, spring_.rlen);
+	auto fS = fSpring(current_state_[spring_.i2 * 2], current_state_[spring_.i1 * 2], spring_.k, spring_.rlen);
 	f[3] = (fG + fD + fS) / mass;
 	return f;
 }
@@ -128,6 +128,14 @@ void PendulumSystem::reset() {
 	// Set the initial state for a pendulum system with n_ particles
 	// connected with springs into a chain from start_point to end_point with uniform intervals.
 	// The rest length of each spring is its length in this initial configuration.
+	for (int i = 0; i < n_ - 1; ++i) {
+		Spring spring = Spring(i, i+1, spring_k, 1.5f / (n_ - 1));
+		springs_.push_back(spring);
+		current_state_[pos(i)] = Vec3f(end_point.x / (n_ - 1) * i, end_point.y / (n_ - 1) * i, 0);
+		current_state_[vel(i)] = Vec3f(0, 0, 0);
+	}
+	current_state_[pos(n_ - 1)] = Vec3f(end_point.x, end_point.y, 0);
+	current_state_[vel(n_ - 1)] = Vec3f(0, 0, 0);
 }
 
 State PendulumSystem::evalF(const State& state) const {
@@ -136,6 +144,21 @@ State PendulumSystem::evalF(const State& state) const {
 	auto f = State(2 * n_);
 	// YOUR CODE HERE (R4)
 	// As in R2, return a derivative of the system state "state".
+	f[0] = f[1] = 0;
+	for (int i = 1; i < n_; ++i) {
+		f[2 * i] = current_state_[vel(i)];
+		// add gravity & drag
+		f[2 * i + 1] = (fGravity(mass) + fDrag(current_state_[vel(i)], drag_k)) / mass;
+	}
+
+	for (auto& spring : springs_) {
+		// add resultant force
+		int i1 = spring.i1;
+		int i2 = spring.i2;
+		auto fS = fSpring(current_state_[pos(i1)], current_state_[pos(i2)], spring.k, spring.rlen) / mass;
+		f[2 * i1 + 1] += fS;
+		f[2 * i2 + 1] += -fS;
+	}
 	return f;
 }
 
