@@ -52,7 +52,16 @@ bool Plane::intersect( const Ray& r, Hit& h, float tmin ) const {
 	// origin + direction * t = p(t)
 	// origin . normal + t * direction . normal = d;
 	// t = (d - origin . normal) / (direction . normal);
-	return false;
+	float denominator  = r.direction.dot(this->normal());
+	if (denominator == 0 || fabs(denominator) < 0.000001) {
+		return false;
+	}
+	float t = (this->offset_ - dot(r.origin, this->normal())) / denominator;
+	if (t < tmin)	return false;
+	if (t < h.t) {
+		h.set(t, material_, normal());
+	}
+	return true;
 }
 
 Transform::Transform(const Mat4f& m, Object3D* o) :
