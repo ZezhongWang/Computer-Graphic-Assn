@@ -35,13 +35,13 @@ bool Group::intersect(const Ray& r, Hit& h, float tmin) const {
 }
 
 bool Box::intersect(const Ray& r, Hit& h, float tmin) const {
-// YOUR CODE HERE (EXTRA)
-// Intersect the box with the ray!
+	// YOUR CODE HERE (EXTRA)
+	// Intersect the box with the ray!
 
-  return false;
+	return false;
 }
 
-bool Plane::intersect( const Ray& r, Hit& h, float tmin ) const {
+bool Plane::intersect(const Ray& r, Hit& h, float tmin) const {
 	// YOUR CODE HERE (R5)
 	// Intersect the ray with the plane.
 	// Pay attention to respecting tmin and h.t!
@@ -52,7 +52,7 @@ bool Plane::intersect( const Ray& r, Hit& h, float tmin ) const {
 	// origin + direction * t = p(t)
 	// origin . normal + t * direction . normal = d;
 	// t = (d - origin . normal) / (direction . normal);
-	float denominator  = r.direction.dot(this->normal());
+	float denominator = r.direction.dot(this->normal());
 	if (denominator == 0 || fabs(denominator) < 0.000001) {
 		return false;
 	}
@@ -81,41 +81,41 @@ bool Transform::intersect(const Ray& r, Hit& h, float tmin) const {
 	// recompute it!
 	// Remember how points, directions, and normals are transformed differently!
 
-	return false; 
+	return false;
 }
 
-bool Sphere::intersect( const Ray& r, Hit& h, float tmin ) const {
+bool Sphere::intersect(const Ray& r, Hit& h, float tmin) const {
 	// Note that the sphere is not necessarily centered at the origin.
-	
+
 	Vec3f tmp = center_ - r.origin;
 	Vec3f dir = r.direction;
 
 	float A = dot(dir, dir);
-	float B = - 2 * dot(dir, tmp);
+	float B = -2 * dot(dir, tmp);
 	float C = dot(tmp, tmp) - sqr(radius_);
-	float radical = B*B - 4*A*C;
+	float radical = B * B - 4 * A * C;
 	if (radical < 0)
 		return false;
 
 	radical = sqrtf(radical);
-	float t_m = ( -B - radical ) / ( 2 * A );
-	float t_p = ( -B + radical ) / ( 2 * A );
-	Vec3f pt_m = r.pointAtParameter( t_m );
-	Vec3f pt_p = r.pointAtParameter( t_p );
+	float t_m = (-B - radical) / (2 * A);
+	float t_p = (-B + radical) / (2 * A);
+	Vec3f pt_m = r.pointAtParameter(t_m);
+	Vec3f pt_p = r.pointAtParameter(t_p);
 
 	assert(r.direction.length() > 0.9f);
 
 	bool flag = t_m <= t_p;
 	if (!flag) {
-		::printf( "sphere ts: %f %f %f\n", tmin, t_m, t_p );
+		::printf("sphere ts: %f %f %f\n", tmin, t_m, t_p);
 		return false;
 	}
-	assert( t_m <= t_p );
+	assert(t_m <= t_p);
 
 	// choose the closest hit in front of tmin
 	float t = (t_m < tmin) ? t_p : t_m;
 
-	if (h.t > t  && t > tmin) {
+	if (h.t > t && t > tmin) {
 		Vec3f normal = r.pointAtParameter(t);
 		normal -= center_;
 		normal.normalize();
@@ -123,10 +123,10 @@ bool Sphere::intersect( const Ray& r, Hit& h, float tmin ) const {
 		return true;
 	}
 	return false;
-} 
+}
 
 Triangle::Triangle(const Vec3f& a, const Vec3f& b, const Vec3f& c,
-	Material *m, const Vec2f& ta, const Vec2f& tb, const Vec2f& tc, bool load_mesh) :
+	Material* m, const Vec2f& ta, const Vec2f& tb, const Vec2f& tc, bool load_mesh) :
 	Object3D(m)
 {
 	vertices_[0] = a;
@@ -142,10 +142,26 @@ Triangle::Triangle(const Vec3f& a, const Vec3f& b, const Vec3f& c,
 	}
 }
 
-bool Triangle::intersect( const Ray& r, Hit& h, float tmin ) const {
+bool Triangle::intersect(const Ray& r, Hit& h, float tmin) const {
 	// YOUR CODE HERE (R6)
 	// Intersect the triangle with the ray!
 	// Again, pay attention to respecting tmin and h.t!
+	Mat3f mat;
+	mat.setCol(0, vertices_[0] - vertices_[1]);
+	mat.setCol(1, vertices_[0] - vertices_[2]);
+	mat.setCol(2, r.direction);
+	mat.invert();
+	Vec3f b = vertices_[0] - r.origin;
+	Vec3f result = mat * b;
+	float beta = result[0];
+	float gamma = result[1];
+	float t = result[2];
+	Vec3f norm = cross(vertices_[0] - vertices_[2], vertices_[1] - vertices_[0]).normalized();
+	if (t < tmin)	return false;
+	if (beta + gamma < 1 && beta > 0 && gamma > 0 && t < h.t) {
+		h.set(t, material_, norm);
+		return true;
+	}
 	return false;
 }
 
