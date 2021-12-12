@@ -20,6 +20,8 @@ void DirectionalLight::getIncidentIllumination(const Vec3f& p,
 	// YOUR CODE HERE (R4)
 	// You should fill in the appropriate information about the "infinitely distant" light
 	// for the renderer to use. See the comment in the base class for extra information.
+	dir_to_light = this->direction_;
+	incident_intensity = this->intensity_;
 }
 
 PointLight::PointLight(const Vec3f& position, const Vec3f& intensity,
@@ -42,4 +44,7 @@ void PointLight::getIncidentIllumination(const Vec3f& p,
 	// quadratic_attenuation_, linear_attenuation_ and constant_attenuation_.
 	// To facilitate the implementation of Phong, do not take the
 	// incident cosine into account here.
+	dir_to_light = (this->position_ - p).normalized();
+	distance = (this->position_ - p).length();
+	incident_intensity = intensity_ * 1.0f / (quadratic_attenuation_ * distance * distance + linear_attenuation_ * distance + constant_attenuation_);
 }

@@ -72,7 +72,14 @@ Vec3f RayTracer::traceRay(Ray& ray, float tmin, int bounces, float refr_index, H
 	// into the debug_rays list similar to what is done to the primary rays after intersection.
 	// For R7, if args_.shadows is on, also shoot a shadow ray from the hit point to the light
 	// to confirm it isn't blocked; if it is, ignore the contribution of the light.
-
+	for (int i = 0; i < scene_.getNumLights(); ++i) {
+		const Light* light = scene_.getLight(i);
+		Vec3f dir_to_light, incident_intensity;
+		float dist;
+		light->getIncidentIllumination(point, dir_to_light, incident_intensity, dist);
+		answer += m->shade(ray, hit, dir_to_light, incident_intensity, args_.shade_back);
+	}
+	
 	// are there bounces left?
 	if (bounces >= 1) {
 		// reflection, but only if reflective coefficient > 0!
