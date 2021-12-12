@@ -104,8 +104,10 @@ public:
 		// YOUR CODE HERE (R3)
 		// Generate a ray with the given screen coordinates, which you should assume lie in [-1,1]^2
 		// How to do this is described in the lecture notes.
-
-		return Ray( FW::Vec3f(0.0f), FW::Vec3f(0.0f) );
+		//FW::Vec3f endpoint = center + point.x * size * horizontal / 2 + point.y * size * up / 2;
+		float dist_to_screen = 1 / FW::tan(fov_angle / 2);
+		FW::Vec3f dir = point.x * horizontal + point.y * up  + dist_to_screen * this->direction;
+		return Ray(center, dir);
 	}
 
 	bool isOrtho() const override { return false; }
