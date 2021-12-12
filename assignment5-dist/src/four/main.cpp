@@ -116,6 +116,7 @@ GLuint render(RayTracer& ray_tracer, SceneParser& scene, const Args& args) {
 		// Loop over pixels on a scanline
 		for (int i = 0; i < args.width; ++i) {
 			// Loop through all the samples for this pixel.
+			Vec3f sample_color = Vec3f(0.0f);
 			for (int n = 0; n < args.num_samples; ++n) {
 				// Get the offset of the sample inside the pixel. 
 				// You need to fill in the implementation for this function when implementing supersampling.
@@ -136,7 +137,7 @@ GLuint render(RayTracer& ray_tracer, SceneParser& scene, const Args& args) {
 
 				// You should fill in the gaps in the implementation of traceRay().
 				// args.bounces gives the maximum number of reflections/refractions that should be traced.
-				Vec3f sample_color = ray_tracer.traceRay(r, tmin, args.bounces, 1.0f, hit, Vec3f(1.0f));
+				sample_color += ray_tracer.traceRay(r, tmin, args.bounces, 1.0f, hit, Vec3f(1.0f));
 
 				// YOUR CODE HERE (R9)
 				// This starter code only supports one sample per pixel and consequently directly
@@ -162,7 +163,7 @@ GLuint render(RayTracer& ray_tracer, SceneParser& scene, const Args& args) {
 				}
 					
 
-				image->setVec4f(Vec2i(i,j), Vec4f(sample_color, 1));
+				image->setVec4f(Vec2i(i, j), Vec4f(sample_color / (args.num_samples * 1.0f), 1));
 				if (depth_image) {
 					// YOUR CODE HERE (R2)
 					// Here you should linearly map the t range [depth_min, depth_max] to the inverted range [1,0] for visualization
