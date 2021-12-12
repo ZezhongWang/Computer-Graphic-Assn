@@ -244,6 +244,7 @@ Args App::get_args() {
 	args.output_file = "debug.png";
 	args.depth_min = .0f;
 	args.depth_max = 1000.0f;
+	args.depth_file = "depth.png";
 	args.show_progress = true;
 
 	return args;
