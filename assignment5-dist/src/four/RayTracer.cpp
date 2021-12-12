@@ -77,6 +77,11 @@ Vec3f RayTracer::traceRay(Ray& ray, float tmin, int bounces, float refr_index, H
 		Vec3f dir_to_light, incident_intensity;
 		float dist;
 		light->getIncidentIllumination(point, dir_to_light, incident_intensity, dist);
+		if (args_.shadows) {
+			Ray r = Ray(point, dir_to_light);
+			if (scene_.getGroup()->intersect(r, Hit(), EPSILON))
+				continue;
+		}
 		answer += m->shade(ray, hit, dir_to_light, incident_intensity, args_.shade_back);
 	}
 	

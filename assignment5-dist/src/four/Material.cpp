@@ -23,22 +23,20 @@ Vec3f PhongMaterial::shade(const Ray &ray, const Hit &hit,
 	Vec3f answer = Vec3f(0.0f);
 	Vec3f hit_point = ray.pointAtParameter(hit.t);
 	Vec3f norm = hit.normal;
-
-	float d = dot(dir_to_light.normalized(), hit.normal);
+	Vec3f pointToEye = (ray.origin - hit_point).normalized();
 
 	if (shade_back) {
-		if (d < 0.0f) {
-			d = fabs(d);
+		if (dot(pointToEye, norm) < 0.0f) {
+			norm = -1.0f * norm;
 		}
 	}
-	if (d < 0.0f) {
+	if (dot(dir_to_light, hit.normal) < 0.0f) {
 		return answer;
 	}
 	// diffuse
-	answer += incident_intensity * FW::clamp(d, 0.0f, 1.0f) * diffuse_color(hit_point);
+	answer += incident_intensity * FW::clamp(dot(dir_to_light, norm), 0.0f, 1.0f) * diffuse_color(hit_point);
 	// specular
-	Vec3f pointToEye = (ray.origin - hit_point).normalized();
-	Vec3f r_vec = -pointToEye - 2 * dot(-pointToEye, norm) * norm;
+	Vec3f r_vec = - pointToEye - 2 * dot(-pointToEye, norm) * norm;
 	r_vec.normalize();
 	answer += incident_intensity * specular_color_ * FW::pow(FW::clamp(dot(r_vec, dir_to_light), 0.0f, 1.0f), exponent_);
 	return answer;
