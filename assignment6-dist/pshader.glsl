@@ -56,7 +56,10 @@ const float PI = 3.14159265359;
 // The GGX distribution function D
 // YOUR CODE HERE (R3)
 float D(vec3 N, vec3 H) {
-	return 1.;
+	if (dot(N, H) <= 0)	return 0.;
+	float cos = dot(N, H);
+	float tan = sqrt(1 - cos * cos) / cos;
+	return pow(roughness, 2) / (PI * pow(cos, 4) * pow(roughness * roughness + tan * tan, 2));
 }
 
 // The Smith geometry term G
@@ -145,8 +148,8 @@ void main()
 	// YOUR CODE HERE (R3)
 	// Compute the to-viewer vector V which you'll need in the loop
 	// below for the specular computation.
-	vec3 V = vec3(.0);
-
+	vec3 V = normalize(-positionVarying);
+	// 
 	// add the contribution of all lights to the answer
 	vec3 answer = vec3(.0);
 
@@ -164,7 +167,9 @@ void main()
 
 		// YOUR CODE HERE (R3, R4, R5)
 		// Compute the GGX specular contribution of this light.
-		vec3 specular;
+		vec3 H = normalize(L + V);
+		float Si = CookTorrance(normalVarying, H, V, L);
+		vec3 specular = vec3(specularColor) * Si * max(0, dot(normalVarying, L)) * Li;
 
 		if (setDiffuseToZero)
 			diffuse = vec3(0, 0, 0);
