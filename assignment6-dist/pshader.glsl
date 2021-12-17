@@ -163,7 +163,7 @@ void main()
 		vec3 L = normalize(lightDirections[i]);
 		vec3 Li = lightIntensities[i];
 		vec3 diffuse = vec3(diffuseColor) * max(0, dot(normalVarying, L)) * Li;
-		answer += vec3(diffuse);
+		// answer += vec3(diffuse);
 
 		// YOUR CODE HERE (R3, R4, R5)
 		// Compute the GGX specular contribution of this light.
