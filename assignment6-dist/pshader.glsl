@@ -65,10 +65,12 @@ float D(vec3 N, vec3 H) {
 // The Smith geometry term G
 // YOUR CODE HERE (R4)
 float G1(vec3 X, vec3 H) {
-	return 1.;
+	float cos = dot(X, H);
+	float tan = sqrt(1 - cos * cos) / cos;
+	return 2. / (1 + sqrt(1 + roughness * roughness * tan * tan));
 }
 float G(vec3 V, vec3 L, vec3 H) {
-	return 1.;
+	return G1(V, H) * G1(L, H);
 }
 
 // Fr is the Fresnel equation for dielectrics
@@ -181,7 +183,7 @@ void main()
 			// YOUR SHADOWS HERE: use lightDist and shadowUV, maybe modify Li
 			// this point is in a shadow is some point is closer to the light than this
 			// (try also adding a small value to either of those and see what happens)
-			//float shadow = 1.0f; // placeholder
+			float shadow = 1.0f; // placeholder
 		}
 
 		if (renderMode >= 4) // debug mode; just sum up the specular distribution for each light
