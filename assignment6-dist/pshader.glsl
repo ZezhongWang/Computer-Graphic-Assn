@@ -78,8 +78,13 @@ float G(vec3 V, vec3 L, vec3 H) {
 float Fr(vec3 L, vec3 H) {
 	const float n1 = 1.0; // air
 	const float n2 = 1.4; // surface
+	float eta = n1 / n2;
+	float cos = dot(L, H);
+	float belta = sqrt( 1 / pow(eta, 2) + cos * cos - 1);
 
-	return 1.0;
+	float Rs = pow((cos - belta) / (cos + belta), 2);
+	float Rp = pow((eta * eta * belta - cos) / (eta * eta * belta + cos), 2);
+	return (Rs + Rp) / 2;
 }
 
 // 4: GGX distribution term D, 5: GGX geometry term G
@@ -178,6 +183,8 @@ void main()
 
 		if (setSpecularToZero)
 			specular = vec3(0, 0, 0);
+
+		light_contribution = diffuse + specular;
 
 		if (shadowMaps) {
 			// YOUR SHADOWS HERE: use lightDist and shadowUV, maybe modify Li
